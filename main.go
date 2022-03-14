@@ -1,32 +1,23 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "fmt"
 
-type Counter struct {
-	Name  string
-	m     sync.RWMutex
-	count int
-}
+type ErrNoSuchEntity struct{ error }
+type ErrConflictEntity struct{ error }
 
 func main() {
-	c := &Counter{
-		Name: "Access",
+	do := func() error {
+		return &ErrConflictEntity{}
 	}
-	fmt.Println(c.Increment())
-}
 
-func (c *Counter) Increment() int {
-	c.m.Lock()
-	defer c.m.Unlock()
-	c.count++
-	return c.count
-}
+	switch do().(type) {
+	case nil:
 
-func (c *Counter) View() int {
-	c.m.RLock()
-	defer c.m.RUnlock()
-	return c.count
+	case *ErrNoSuchEntity:
+		fmt.Println("error no such entity")
+	case *ErrConflictEntity:
+		fmt.Println("error conflict entity")
+	default:
+		fmt.Println("unknown error")
+	}
 }
