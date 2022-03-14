@@ -1,23 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	"io"
+)
 
-type ErrNoSuchEntity struct{ error }
-type ErrConflictEntity struct{ error }
+func IsPNG(r io.Reader) (bool, error) {
+	magicnum := []byte{137, 80, 78, 71}
+	buf := make([]byte, len(magicnum))
+	_, err := io.ReadAtLeast(r, buf, len(buf))
+	if err != nil {
+		return false, err
+	}
+	return bytes.Equal(magicnum, buf), nil
+}
 
 func main() {
-	do := func() error {
-		return &ErrConflictEntity{}
-	}
 
-	switch do().(type) {
-	case nil:
-
-	case *ErrNoSuchEntity:
-		fmt.Println("error no such entity")
-	case *ErrConflictEntity:
-		fmt.Println("error conflict entity")
-	default:
-		fmt.Println("unknown error")
-	}
 }
