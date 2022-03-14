@@ -1,20 +1,32 @@
 package main
 
 import (
-	"bytes"
-	"io"
+	"os"
+	"path/filepath"
 )
-
-func IsPNG(r io.Reader) (bool, error) {
-	magicnum := []byte{137, 80, 78, 71}
-	buf := make([]byte, len(magicnum))
-	_, err := io.ReadAtLeast(r, buf, len(buf))
-	if err != nil {
-		return false, err
-	}
-	return bytes.Equal(magicnum, buf), nil
-}
 
 func main() {
 
+}
+
+func Walk(dir string, f func(b []byte, err error) error) error {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		path := filepath.Join(dir, file.Name())
+		if !file.IsDir() {
+			b, err := os.ReadFile(path)
+			if err := f(b, err); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := Walk(path, f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
