@@ -3,19 +3,15 @@ package main
 import "fmt"
 
 func main() {
-	src := []int{1, 2, 3, 4, 5}
-	dst := src[:0]
-	for _, v := range src {
-		if even(v) {
-			dst = append(dst, v)
+	followers := []string{"John", "Richard", "John", "Jane", "Jane", "Alan"}
+	unique := make([]string, 0, len(followers))
+	m := make(map[string]struct{})
+	for _, v := range followers {
+		if _, ok := m[v]; ok {
+			continue
 		}
+		unique = append(unique, v)
+		m[v] = struct{}{}
 	}
-	fmt.Println(dst)
-	for i := len(dst); i < len(src); i++ {
-		src[i] = 0
-	}
-}
-
-func even(n int) bool {
-	return n%2 == 0
+	fmt.Println(unique)
 }
