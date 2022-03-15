@@ -2,27 +2,23 @@ package main
 
 import (
 	"log"
+	"sync"
 	"time"
 )
 
 func main() {
-	doneCh := make(chan struct{})
+	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
-		i := i
-		go do(i, doneCh)
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			do(n)
+		}(i)
 	}
-	close(doneCh)
-	time.Sleep(300 * time.Millisecond)
+	wg.Wait()
 }
 
-func do(n int, doneCh <-chan struct{}) {
-	for {
-		select {
-		case <-doneCh:
-			log.Printf("finished %d", n)
-			return
-		default:
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
+func do(n int) {
+	time.Sleep(1 * time.Second)
+	log.Printf("%d called", n)
 }
