@@ -1,32 +1,18 @@
 package main
 
-import (
-	"os"
-	"path/filepath"
-)
+import "fmt"
 
 func main() {
+	ch1 := make(chan int, 1)
+	ch1 <- 100
 
-}
+	ch2 := make(chan int, 1)
+	ch2 <- 200
 
-func Walk(dir string, f func(b []byte, err error) error) error {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		return err
+	select {
+	case n, ok := <-ch1:
+		fmt.Println(n, ok)
+	case n, ok := <-ch2:
+		fmt.Println(n, ok)
 	}
-
-	for _, file := range files {
-		path := filepath.Join(dir, file.Name())
-		if !file.IsDir() {
-			b, err := os.ReadFile(path)
-			if err := f(b, err); err != nil {
-				return err
-			}
-			continue
-		}
-		if err := Walk(path, f); err != nil {
-			return err
-		}
-	}
-	return nil
 }
