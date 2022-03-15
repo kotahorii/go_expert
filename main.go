@@ -1,18 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"time"
+)
 
 func main() {
-	ch1 := make(chan int, 1)
-	ch1 <- 100
+	doneCh := make(chan struct{})
+	for i := 0; i < 10; i++ {
+		i := i
+		go do(i, doneCh)
+	}
+	close(doneCh)
+	time.Sleep(300 * time.Millisecond)
+}
 
-	ch2 := make(chan int, 1)
-	ch2 <- 200
-
-	select {
-	case n, ok := <-ch1:
-		fmt.Println(n, ok)
-	case n, ok := <-ch2:
-		fmt.Println(n, ok)
+func do(n int, doneCh <-chan struct{}) {
+	for {
+		select {
+		case <-doneCh:
+			log.Printf("finished %d", n)
+			return
+		default:
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
 }
